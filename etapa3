@@ -1,0 +1,125 @@
+//etapa 3
+
+const int ledVermelho = 10;
+const int ledAmarelo = 9;
+const int ledVerde = 8;
+
+const int botao = 7;
+const int pot = A0;
+
+bool modoNoturno = false;
+unsigned long tempoPressionado = 0;
+bool botaoAnterior = LOW;
+
+int ciclos = 0;
+
+// função pra log com tempo
+void logMsg(String msg) {
+Serial.print("[");
+Serial.print(millis());
+Serial.print(" ms] ");
+Serial.println(msg);
+}
+
+// detecta pressionamento longo
+void verificarBotao() {
+bool estado = digitalRead(botao);
+
+if (estado == HIGH && botaoAnterior == LOW) {
+tempoPressionado = millis();
+}
+
+if (estado == HIGH && (millis() - tempoPressionado >= 2000)) {
+modoNoturno = !modoNoturno;
+logMsg(modoNoturno ? "MODO NOTURNO ATIVADO" : "MODO NORMAL");
+
+
+delay(300); // evita múltiplas ativações
+
+
+}
+
+botaoAnterior = estado;
+}
+
+// função de LED com interrupção por botão
+void onLed(int pino, String nome, int tempoMs) {
+digitalWrite(ledVermelho, LOW);
+digitalWrite(ledAmarelo, LOW);
+digitalWrite(ledVerde, LOW);
+
+digitalWrite(pino, HIGH);
+
+int passos = tempoMs / 200;
+
+for (int i = 0; i < passos; i++) {
+
+
+verificarBotao();
+if (modoNoturno) return;
+
+Serial.print("ON: ");
+Serial.println(nome);
+
+delay(200);
+
+
+}
+
+digitalWrite(pino, LOW);
+}
+
+void setup() {
+pinMode(ledVermelho, OUTPUT);
+pinMode(ledAmarelo, OUTPUT);
+pinMode(ledVerde, OUTPUT);
+
+pinMode(botao, INPUT);
+
+Serial.begin(9600);
+}
+
+void loop() {
+
+verificarBotao();
+
+// modo noturno
+if (modoNoturno) {
+logMsg("MODO NOTURNO");
+
+
+digitalWrite(ledVermelho, LOW);
+digitalWrite(ledVerde, LOW);
+
+digitalWrite(ledAmarelo, HIGH);
+delay(500);
+
+digitalWrite(ledAmarelo, LOW);
+delay(500);
+
+return;
+
+
+}
+
+// leitura do potenciômetro
+int valorPot = analogRead(pot);
+int tempo = map(valorPot, 0, 1023, 200, 2000);
+
+Serial.print("Intervalo: ");
+Serial.print(tempo);
+Serial.print(" ms | Ciclos: ");
+Serial.println(ciclos);
+
+// ciclo do semáforo
+onLed(ledVerde, "Verde", tempo);
+onLed(ledAmarelo, "Amarelo", tempo / 2);
+onLed(ledVermelho, "Vermelho", tempo);
+
+ciclos++;
+
+// alerta a cada 5 ciclos
+if (ciclos % 5 == 0) {
+logMsg("ALERTA: múltiplo de 5 ciclos atingido");
+}
+}
