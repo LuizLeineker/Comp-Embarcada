@@ -1,0 +1,34 @@
+// ETAPA 1
+const int ledVermelho = 10;
+const int ledAmarelo = 9;
+const int ledVerde = 8;
+
+// liga o led de acordo com o tempo e faz o print
+void onLed(int pino, String nome, int tempoMs) {
+digitalWrite(ledVermelho, LOW);
+digitalWrite(ledAmarelo, LOW);
+digitalWrite(ledVerde, LOW);
+
+digitalWrite(pino, HIGH);
+
+int segundos = tempoMs / 1000;
+
+for (int i = 0; i < segundos; i++) {
+Serial.print("ON: ");
+Serial.println(nome);
+delay(1000);
+}
+
+digitalWrite(pino, LOW);
+}
+
+void setup() {
+Serial.begin(9600);
+}
+
+void loop() {
+// 5 SEGUNDOS PARA O RED, 2 PARA AMARELO E 5 PARA O VERDE
+onLed(ledVermelho, "Vermelho", 5000);
+onLed(ledAmarelo, "Amarelo", 2000);
+onLed(ledVerde, "Verde", 5000);
+}
