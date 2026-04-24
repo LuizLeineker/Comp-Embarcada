@@ -1,0 +1,74 @@
+// etapa 2
+const int ledVermelho = 10;
+const int ledAmarelo = 9;
+const int ledVerde = 8;
+
+const int botao = 7;
+const int pot = A0;
+
+// liga o led de acordo com o tempo e faz o print
+void onLed(int pino, String nome, int tempoMs) {
+digitalWrite(ledVermelho, LOW);
+digitalWrite(ledAmarelo, LOW);
+digitalWrite(ledVerde, LOW);
+
+digitalWrite(pino, HIGH);
+
+int passos = tempoMs / 200; // divide em blocos de 200ms
+
+for (int i = 0; i < passos; i++) {
+
+
+// verifica botão durante execução
+if (digitalRead(botao) == HIGH) {
+  digitalWrite(pino, LOW);
+  return;
+}
+
+Serial.print("ON: ");
+Serial.println(nome);
+delay(200);
+
+
+}
+
+digitalWrite(pino, LOW);
+}
+
+void setup() {
+pinMode(ledVermelho, OUTPUT);
+pinMode(ledAmarelo, OUTPUT);
+pinMode(ledVerde, OUTPUT);
+
+pinMode(botao, INPUT);
+
+Serial.begin(9600);
+}
+
+void loop() {
+int estadoBotao = digitalRead(botao);
+
+// lê potenciômetro e converte (200ms a 2000ms)
+int valorPot = analogRead(pot);
+int tempo = map(valorPot, 0, 1023, 200, 2000);
+
+// print a cada ciclo
+Serial.print("Intervalo: ");
+Serial.print(tempo);
+Serial.print(" ms | Pausa: ");
+Serial.println(estadoBotao == HIGH ? "ATIVO" : "NAO");
+
+// se botão pressionado → pausa tudo
+if (estadoBotao == HIGH) {
+digitalWrite(ledVermelho, LOW);
+digitalWrite(ledAmarelo, LOW);
+digitalWrite(ledVerde, LOW);
+delay(200);
+return;
+}
+
+// usa tempo do potenciômetro
+onLed(ledVermelho, "Vermelho", tempo);
+onLed(ledAmarelo, "Amarelo", tempo / 2);
+onLed(ledVerde, "Verde", tempo);
+}
